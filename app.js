@@ -11,24 +11,13 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const cors = require('cors');
 
-const middleware = require('./middleware');
+const middleware = require('./utils/middleware');
 
 const dotenv = require('dotenv');
 dotenv.config({ path: 'config.env' });
 
-// i will move these
-const User = require('./models/User');
-
-mongoose.connect(
-  process.env.MONGO_DB,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-  () => {
-    console.log('Database connected');
-  }
-);
+const connectDb = require('./utils/connectDb');
+connectDb();
 
 // route imports ----------------------------------------------------------
 
@@ -57,7 +46,7 @@ app.use(
 app.use(cookieParser('beniscool'));
 app.use(passport.initialize());
 app.use(passport.session());
-require('./passportConfig')(passport);
+require('./utils/passportConfig')(passport);
 
 app.use(logger('dev'));
 
