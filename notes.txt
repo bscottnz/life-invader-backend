@@ -1,0 +1,3 @@
+for all api routes, have middleware that checks if looged in. if not logged in, send back certain 
+code / message which will trigger front end to update userloggedin and redirect to welcoem page.
+

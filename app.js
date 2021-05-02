@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+const app = express();
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -10,6 +11,8 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const cors = require('cors');
 
+const middleware = require('./middleware');
+
 const dotenv = require('dotenv');
 dotenv.config({ path: 'config.env' });
 
@@ -17,7 +20,7 @@ dotenv.config({ path: 'config.env' });
 const User = require('./models/User');
 
 mongoose.connect(
-  'mongodb+srv://ben:12345@cluster0.erh69.mongodb.net/life-invader?retryWrites=true&w=majority',
+  process.env.MONGO_DB,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -27,12 +30,12 @@ mongoose.connect(
   }
 );
 
-// routes imports
-const indexRouter = require('./routes/index');
+// route imports ----------------------------------------------------------
 
-const app = express();
+const loginRoute = require('./routes/loginRoutes');
+const registerRoute = require('./routes/registerRoutes');
 
-// middleware
+// middleware -------------------------------------------------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -60,53 +63,10 @@ app.use(logger('dev'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// routes
+// routes -----------------------------------------------------------------
 
-app.use('/', indexRouter);
-app.get('/ben', (req, res) => {
-  res.json({ title: 'test' });
-});
-app.post('/ben', (req, res) => {
-  console.log(req.body);
-  res.json({ title: 'post' });
-});
-
-app.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) throw err;
-
-    if (!user) res.send('Wrong username or password');
-    else {
-      req.logIn(user, (err) => {
-        if (err) throw err;
-        res.send(req.user);
-      });
-    }
-  })(req, res, next);
-});
-
-app.post('/register', (req, res) => {
-  User.findOne({ username: req.body.username }, async (err, doc) => {
-    if (err) throw err;
-    if (doc) {
-      res.send('user already exists');
-    }
-    if (!doc) {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
-      const newUser = new User({
-        username: req.body.username,
-        password: hashedPassword,
-      });
-
-      await newUser.save();
-      res.send('user created');
-    }
-  });
-});
-
-// app.get('/user', (req, res) => {
-//   res.send(req.user);
-// });
+app.use('/login', loginRoute);
+app.use('/register', registerRoute);
 
 app.get('/logout', (req, res) => {
   console.log(req.user);
@@ -115,6 +75,7 @@ app.get('/logout', (req, res) => {
   res.send('logging owt');
 });
 
+// returns user data to make sure there is a logged in user
 app.get('/authenticate', (req, res, next) => {
   res.send(req.user);
 });
