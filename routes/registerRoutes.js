@@ -33,6 +33,8 @@ router.post('/', async (req, res) => {
         password,
       };
 
+      data.password = await bcrypt.hash(password, 10);
+
       User.create(data).then((user) => {
         console.log(user);
         return res.status(200).send(user);
