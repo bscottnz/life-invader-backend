@@ -3,12 +3,21 @@ const app = express();
 const router = express.Router();
 const User = require('../models/UserSchema');
 const bcrypt = require('bcryptjs');
+const { body } = require('express-validator');
 
 router.post('/', async (req, res) => {
-  const firstName = req.body.firstName.trim();
-  const lastName = req.body.lastName.trim();
-  const username = req.body.username.trim();
-  const email = req.body.email.trim();
+  // im not returning these errors since everything is validated client side.
+  // just using it to escape. Although if this was a real app i would double check properly.
+  body('firstName', '').trim().escape();
+  body('lastName', '').trim().escape();
+  body('username', '').trim().escape();
+  body('email', '').trim().escape();
+  body('password', '').escape();
+
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const username = req.body.username;
+  const email = req.body.email;
   const password = req.body.password;
 
   if (firstName && lastName && username && email && password) {
