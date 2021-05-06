@@ -24,6 +24,8 @@ connectDb();
 const loginRoute = require('./routes/loginRoutes');
 const registerRoute = require('./routes/registerRoutes');
 
+const postsApiRoute = require('./routes/api/posts');
+
 // middleware -------------------------------------------------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -56,6 +58,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/login', loginRoute);
 app.use('/register', registerRoute);
+
+app.use('/api/posts', postsApiRoute);
 
 app.get('/logout', (req, res) => {
   console.log(req.user);
