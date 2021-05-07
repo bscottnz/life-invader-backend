@@ -86,4 +86,59 @@ router.put('/:id/dislike', async (req, res, next) => {
   res.status(200).send(post);
 });
 
+router.post('/:id/share', async (req, res, next) => {
+  // make sure a logged in user is sending this request
+  if (req.user === undefined) {
+    return res.sendStatus(400);
+  }
+
+  const postId = req.params.id;
+  const userId = req.user._id;
+
+  // try to delete shared post. if it can be deleted, it has been un-shared.
+  // if it cant delete it, then it will share the post
+  const deletedPost = await Post.findOneAndDelete({ author: userId, sharedPostData: postId }).catch(
+    (err) => {
+      console.log(err);
+      res.sendStatus(400);
+    }
+  );
+
+  // create relevent db operator that either adds or removes post from
+  // users dislike array
+  const option = deletedPost != null ? '$pull' : '$addToSet';
+
+  let repost = deletedPost;
+
+  // create post
+  if (repost == null) {
+    repost = await Post.create({ author: userId, sharedPostData: postId }).catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+  }
+
+  // insert user shared post
+  req.user = await User.findByIdAndUpdate(
+    userId,
+    { [option]: { shares: repost._id } },
+    { new: true }
+  ).catch((err) => {
+    console.log(err);
+    res.sendStatus(400);
+  });
+
+  // insert post shared by user
+  const post = await Post.findByIdAndUpdate(
+    postId,
+    { [option]: { sharedBy: userId } },
+    { new: true }
+  ).catch((err) => {
+    console.log(err);
+    res.sendStatus(400);
+  });
+
+  res.status(200).send(post);
+});
+
 module.exports = router;

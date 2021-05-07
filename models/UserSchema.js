@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema(
       default: '/images/profilePic.jpg',
     },
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true }
 );
