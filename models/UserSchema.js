@@ -32,6 +32,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: '/images/profilePic.jpg',
     },
+    dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true }
 );
