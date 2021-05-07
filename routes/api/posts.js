@@ -5,6 +5,19 @@ const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 
+router.get('/', (req, res, next) => {
+  Post.find()
+    .populate('author')
+    .sort({ createdAt: -1 })
+    .then((posts) => {
+      res.status(200).send(posts);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 router.post('/', async (req, res, next) => {
   if (!req.body.content) {
     console.log('no content sent with post post request');
