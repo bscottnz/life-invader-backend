@@ -140,7 +140,12 @@ router.post('/:id/share', async (req, res, next) => {
     res.sendStatus(400);
   });
 
-  res.status(200).send(post);
+  // populate the repost orignal info so can update the front end without having to refresh
+  repost = await Post.populate(repost, { path: 'sharedPostData' });
+  repost = await Post.populate(repost, { path: 'sharedPostData.author' });
+  repost = await User.populate(repost, { path: 'author' });
+
+  res.status(200).send({ post, repost, option });
 });
 
 module.exports = router;
