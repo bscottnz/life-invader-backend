@@ -8,8 +8,10 @@ const Post = require('../../models/PostSchema');
 router.get('/', (req, res, next) => {
   Post.find()
     .populate('author')
+    .populate('sharedPostData')
     .sort({ createdAt: -1 })
-    .then((posts) => {
+    .then(async (posts) => {
+      posts = await User.populate(posts, { path: 'sharedPostData.author' });
       res.status(200).send(posts);
     })
     .catch((err) => {
