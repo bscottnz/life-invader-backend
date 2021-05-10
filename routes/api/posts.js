@@ -13,8 +13,14 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   const postId = req.params.id;
   const posts = await getPosts({ _id: postId });
-  // will only contain 1 results
-  res.status(200).send(posts[0]);
+
+  // if the post was found and no error
+  if (posts && posts.length > 0) {
+    // will only contain 1 results
+    res.status(200).send(posts[0]);
+  } else {
+    res.sendStatus(400);
+  }
 });
 
 router.post('/', async (req, res, next) => {
