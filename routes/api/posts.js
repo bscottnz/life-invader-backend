@@ -5,19 +5,16 @@ const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 
-router.get('/', (req, res, next) => {
-  Post.find()
-    .populate('author')
-    .populate('sharedPostData')
-    .sort({ createdAt: -1 })
-    .then(async (posts) => {
-      posts = await User.populate(posts, { path: 'sharedPostData.author' });
-      res.status(200).send(posts);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(400);
-    });
+router.get('/', async (req, res, next) => {
+  const posts = await getPosts();
+  res.status(200).send(posts);
+});
+
+router.get('/:id', async (req, res, next) => {
+  const postId = req.params.id;
+  const posts = await getPosts({ _id: postId });
+  // will only contain 1 results
+  res.status(200).send(posts[0]);
 });
 
 router.post('/', async (req, res, next) => {
@@ -31,6 +28,11 @@ router.post('/', async (req, res, next) => {
     author: req.user,
   };
 
+  // add reply to field if the post is a reply
+  if (req.body.replyTo) {
+    postData.replyTo = req.body.replyTo;
+  }
+
   // if i restart server and try to make a post, it crashes every reload
   // since the post was sent to db with no user property.
   if (postData.author === undefined) {
@@ -41,6 +43,13 @@ router.post('/', async (req, res, next) => {
     .then(async (newPost) => {
       newPost = await User.populate(newPost, { path: 'author' });
       console.log(newPost);
+
+      // populate relevent info if the post is a reply, so the reply
+      // can be appended to dom by the front end immediatley
+      if (newPost.replyTo) {
+        newPost = await Post.populate(newPost, { path: 'replyTo' });
+        newPost = await User.populate(newPost, { path: 'replyTo.author' });
+      }
       res.status(201).send(newPost);
     })
     .catch((err) => {
@@ -147,5 +156,19 @@ router.post('/:id/share', async (req, res, next) => {
 
   res.status(200).send({ post, repost, option });
 });
+
+async function getPosts(filter = {}) {
+  let posts = await Post.find(filter)
+    .populate('author')
+    .populate('sharedPostData')
+    .populate('replyTo')
+    .sort({ createdAt: -1 })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  posts = await User.populate(posts, { path: 'replyTo.author' });
+  return await User.populate(posts, { path: 'sharedPostData.author' });
+}
 
 module.exports = router;
