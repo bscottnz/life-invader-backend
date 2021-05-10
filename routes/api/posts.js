@@ -17,7 +17,21 @@ router.get('/:id', async (req, res, next) => {
   // if the post was found and no error
   if (posts && posts.length > 0) {
     // will only contain 1 results
-    res.status(200).send(posts[0]);
+    const post = posts[0];
+
+    const results = {
+      post: post,
+    };
+
+    // check to see if the post is a reply, if so get the post it is
+    // replying to
+    if (post.replyTo !== undefined) {
+      results.replyTo = post.replyTo;
+    }
+    // get all replies to the post
+    results.replies = await getPosts({ replyTo: postId });
+
+    res.status(200).send(results);
   } else {
     res.sendStatus(400);
   }
