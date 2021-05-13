@@ -27,6 +27,14 @@ router.get('/:id', async (req, res, next) => {
     // replying to
     if (post.replyTo !== undefined) {
       results.replyTo = post.replyTo;
+
+      // if the post we are replying to is replying to another post, get that post data
+      // so we can display who that post is replying to.
+      // this is some inception level shit
+      if (post.replyTo.replyTo !== undefined) {
+        results.replyTo = await Post.populate(results.replyTo, { path: 'replyTo' });
+        results.replyTo.replyTo = await User.populate(results.replyTo.replyTo, { path: 'author' });
+      }
     }
     // get all replies to the post
     results.replies = await getPosts({ replyTo: postId });
@@ -182,6 +190,7 @@ async function getPosts(filter = {}) {
     .populate('author')
     .populate('sharedPostData')
     .populate('replyTo')
+
     .sort({ createdAt: -1 })
     .catch((err) => {
       console.log(err);
