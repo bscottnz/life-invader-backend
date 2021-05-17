@@ -185,6 +185,17 @@ router.post('/:id/share', async (req, res, next) => {
   res.status(200).send({ post, repost, option });
 });
 
+router.delete('/:id', (req, res, next) => {
+  Post.findByIdAndDelete(req.params.id)
+    .then(() => {
+      res.sendStatus(202);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 async function getPosts(filter = {}) {
   let posts = await Post.find(filter)
     .populate('author')
