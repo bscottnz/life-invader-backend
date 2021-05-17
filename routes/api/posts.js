@@ -186,14 +186,18 @@ router.post('/:id/share', async (req, res, next) => {
 });
 
 router.delete('/:id', (req, res, next) => {
-  Post.findByIdAndDelete(req.params.id)
-    .then(() => {
-      res.sendStatus(202);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(400);
-    });
+  // delete the post and any posts that shared the deleted post
+  Post.deleteMany(
+    { $or: [{ sharedPostData: req.params.id }, { _id: req.params.id }] },
+    function (err, result) {
+      if (err) {
+        console.log(err);
+        res.sendStatus(400);
+      } else {
+        res.sendStatus(202);
+      }
+    }
+  );
 });
 
 async function getPosts(filter = {}) {
