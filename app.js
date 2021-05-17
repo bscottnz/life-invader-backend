@@ -59,7 +59,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/login', loginRoute);
 app.use('/register', registerRoute);
 
-app.use('/api/posts', postsApiRoute);
+// app.use(middleware.requireLogin);
+
+app.use('/api/posts', middleware.requireLogin, postsApiRoute);
 
 app.get('/logout', (req, res) => {
   console.log(req.user);
