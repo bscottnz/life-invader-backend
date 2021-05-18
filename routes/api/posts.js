@@ -31,7 +31,7 @@ router.get('/:id', async (req, res, next) => {
       // if the post we are replying to is replying to another post, get that post data
       // so we can display who that post is replying to.
       // this is some inception level shit
-      if (post.replyTo.replyTo !== undefined) {
+      if (post.replyTo !== null && post.replyTo.replyTo !== undefined) {
         results.replyTo = await Post.populate(results.replyTo, { path: 'replyTo' });
         results.replyTo.replyTo = await User.populate(results.replyTo.replyTo, { path: 'author' });
       }
