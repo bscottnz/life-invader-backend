@@ -67,10 +67,13 @@ router.post('/', async (req, res, next) => {
     return res.sendStatus(400);
   }
 
-  Post.create(postData)
+  let post;
+
+  await Post.create(postData)
     .then(async (newPost) => {
+      post = newPost;
       newPost = await User.populate(newPost, { path: 'author' });
-      console.log(newPost);
+      // console.log(newPost);
 
       // populate relevent info if the post is a reply, so the reply
       // can be appended to dom by the front end immediatley
@@ -84,6 +87,16 @@ router.post('/', async (req, res, next) => {
       console.log(err);
       res.sendStatus(400);
     });
+
+  // if the newly created post was a reply, add it to the replies array of the post
+  // it was replying to.
+  if (req.body.replyTo) {
+    await Post.findByIdAndUpdate(
+      req.body.replyTo,
+      { $addToSet: { replies: post._id } },
+      { new: true }
+    );
+  }
 });
 
 router.put('/:id/dislike', async (req, res, next) => {
@@ -205,6 +218,7 @@ async function getPosts(filter = {}) {
     .populate('author')
     .populate('sharedPostData')
     .populate('replyTo')
+    .populate('replies')
 
     .sort({ createdAt: -1 })
     .catch((err) => {

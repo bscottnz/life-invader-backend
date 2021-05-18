@@ -9,6 +9,7 @@ const PostSchema = new mongoose.Schema(
     sharedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     sharedPostData: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
     replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+    replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true }
 );
