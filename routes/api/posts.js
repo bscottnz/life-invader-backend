@@ -6,7 +6,8 @@ const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 
 router.get('/', async (req, res, next) => {
-  const posts = await getPosts();
+  let posts = await getPosts();
+
   res.status(200).send(posts);
 });
 
@@ -198,7 +199,19 @@ router.post('/:id/share', async (req, res, next) => {
   res.status(200).send({ post, repost, option });
 });
 
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
+  // get the post we are deleting, so we can see what post it is replying to, if any,
+  // and delete it from that posts array of replies
+  const toDelete = await Post.findById(req.params.id);
+
+  if (toDelete.replyTo) {
+    await Post.findByIdAndUpdate(
+      toDelete.replyTo,
+      { $pull: { replies: req.params.id } },
+      { new: true }
+    );
+  }
+
   // delete the post and any posts that shared the deleted post
   Post.deleteMany(
     { $or: [{ sharedPostData: req.params.id }, { _id: req.params.id }] },
@@ -225,7 +238,10 @@ async function getPosts(filter = {}) {
       console.log(err);
     });
 
+  // there has to be a more efficient way to do all these queries
   posts = await User.populate(posts, { path: 'replyTo.author' });
+  // this took me a while to figure out, needing to add the model to correctly populate an array
+  posts = await Post.populate(posts, { path: 'sharedPostData.replies', model: 'Post' });
   return await User.populate(posts, { path: 'sharedPostData.author' });
 }
 
