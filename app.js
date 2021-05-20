@@ -25,6 +25,7 @@ const loginRoute = require('./routes/loginRoutes');
 const registerRoute = require('./routes/registerRoutes');
 
 const postsApiRoute = require('./routes/api/posts');
+const profileApiRoute = require('./routes/api/profile');
 
 // middleware -------------------------------------------------------------
 app.use(express.json());
@@ -62,6 +63,7 @@ app.use('/register', registerRoute);
 // app.use(middleware.requireLogin);
 
 app.use('/api/posts', middleware.requireLogin, postsApiRoute);
+app.use('/api/profile', middleware.requireLogin, profileApiRoute);
 
 app.get('/logout', (req, res) => {
   console.log(req.user);
