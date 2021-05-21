@@ -7,7 +7,6 @@ const Post = require('../../models/PostSchema');
 
 router.get('/:username', async (req, res, next) => {
   const username = req.params.username;
-  console.log(username);
 
   const user = await User.findOne({ username: username });
 

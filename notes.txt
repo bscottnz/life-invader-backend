@@ -6,3 +6,5 @@ need to handle the case in middleware.js
 maybe refactor auth to use jwt ?
 
 add google sign in
+
+async parralel for db calls
