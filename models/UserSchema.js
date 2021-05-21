@@ -34,6 +34,9 @@ const UserSchema = new mongoose.Schema(
     },
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
     shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    goldenName: Boolean,
   },
   { timestamps: true }
 );
