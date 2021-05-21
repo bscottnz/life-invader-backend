@@ -6,7 +6,8 @@ const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 
 router.get('/', async (req, res, next) => {
-  let posts = await getPosts();
+  const searchObj = req.query;
+  let posts = await getPosts(searchObj);
 
   res.status(200).send(posts);
 });
