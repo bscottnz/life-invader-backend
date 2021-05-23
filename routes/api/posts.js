@@ -7,6 +7,21 @@ const Post = require('../../models/PostSchema');
 
 router.get('/', async (req, res, next) => {
   const searchObj = req.query;
+
+  // in case the user has no following array
+  if (!req.user.following) {
+    req.user.following = [];
+  }
+
+  // ids of users the logged in user is following
+  const followingIds = [...req.user.following];
+
+  // add own id to array
+  followingIds.push(req.user._id);
+
+  // only return posts by ids in followingIds
+  searchObj.author = { $in: followingIds };
+
   let posts = await getPosts(searchObj);
 
   res.status(200).send(posts);
