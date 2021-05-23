@@ -40,4 +40,17 @@ router.put('/:userId/follow', async (req, res, next) => {
   res.send(req.user);
 });
 
+router.get('/:username/followers', (req, res, next) => {
+  User.findOne({ username: req.params.username })
+    .populate('followers')
+    .populate('following')
+    .then((results) => {
+      res.status(200).send(results);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 module.exports = router;
