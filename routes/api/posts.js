@@ -13,14 +13,25 @@ router.get('/', async (req, res, next) => {
     req.user.following = [];
   }
 
-  // ids of users the logged in user is following
-  const followingIds = [...req.user.following];
+  // if only want to return post by users we are following
+  if (searchObj.followingPostsOnly !== undefined) {
+    const followingPostsOnly = searchObj.followingPostsOnly == 'true';
 
-  // add own id to array
-  followingIds.push(req.user._id);
+    // dont want to limit posts if the param was set to false
+    if (followingPostsOnly) {
+      // ids of users the logged in user is following
+      const followingIds = [...req.user.following];
 
-  // only return posts by ids in followingIds
-  searchObj.author = { $in: followingIds };
+      // add own id to array
+      followingIds.push(req.user._id);
+
+      // only return posts by ids in followingIds
+      searchObj.author = { $in: followingIds };
+    }
+
+    // delete following only ajax param
+    delete searchObj.followingPostsOnly;
+  }
 
   let posts = await getPosts(searchObj);
 
