@@ -4,6 +4,11 @@ const router = express.Router();
 const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const upload = multer({ dest: 'uploads/' });
 
 router.put('/:userId/follow', async (req, res, next) => {
   const userId = req.params.userId;
@@ -51,6 +56,34 @@ router.get('/:username/followers', (req, res, next) => {
       console.log(err);
       res.sendStatus(400);
     });
+});
+
+router.post('/profilePicture', upload.single('profilePic'), async (req, res, next) => {
+  if (!req.file) {
+    console.log('no profile image uploaded');
+    return res.sendStatus(400);
+  }
+
+  // const filePath = `/uploads/images/${req.file.filename}.png`;
+  const filePath = `/public/images/userImages/${req.file.filename}.png`;
+  const clientPath = `/images/userImages/${req.file.filename}.png`;
+  const tempPath = req.file.path;
+  const targetPath = path.join(__dirname, `../../${filePath}`);
+
+  fs.rename(tempPath, targetPath, async (error) => {
+    if (error !== null) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+
+    req.user = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePic: clientPath },
+      { new: true }
+    );
+
+    res.status(200).send(req.user);
+  });
 });
 
 module.exports = router;
