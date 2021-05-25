@@ -86,4 +86,32 @@ router.post('/profilePicture', upload.single('profilePic'), async (req, res, nex
   });
 });
 
+router.post('/coverPhoto', upload.single('coverPic'), async (req, res, next) => {
+  if (!req.file) {
+    console.log('no profile image uploaded');
+    return res.sendStatus(400);
+  }
+
+  // const filePath = `/uploads/images/${req.file.filename}.png`;
+  const filePath = `/public/images/userImages/${req.file.filename}.png`;
+  const clientPath = `/images/userImages/${req.file.filename}.png`;
+  const tempPath = req.file.path;
+  const targetPath = path.join(__dirname, `../../${filePath}`);
+
+  fs.rename(tempPath, targetPath, async (error) => {
+    if (error !== null) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+
+    req.user = await User.findByIdAndUpdate(
+      req.user._id,
+      { coverPhoto: clientPath },
+      { new: true }
+    );
+
+    res.status(200).send(req.user);
+  });
+});
+
 module.exports = router;
