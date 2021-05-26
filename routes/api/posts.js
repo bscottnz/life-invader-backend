@@ -63,13 +63,13 @@ router.get('/:id', async (req, res, next) => {
         results.replyTo = await Post.populate(results.replyTo, { path: 'replyTo' });
 
         results.replyTo.replyTo = await User.populate(results.replyTo.replyTo, { path: 'author' });
-
-        // populate the replies to this post
-        results.replyTo = await Post.populate(results.replyTo, {
-          path: 'replies',
-          model: 'Post',
-        });
       }
+
+      // populate the replies to this post
+      results.replyTo = await Post.populate(results.replyTo, {
+        path: 'replies',
+        model: 'Post',
+      });
     }
     // get all replies to the post
     results.replies = await getPosts({ replyTo: postId });
@@ -258,6 +258,22 @@ router.delete('/:id', async (req, res, next) => {
       }
     }
   );
+});
+
+router.put('/:id', async (req, res, next) => {
+  if (req.body.pinned !== undefined) {
+    await Post.updateMany({ author: req.user._id }, { pinned: false }).catch((err) => {
+      console.log(err);
+      return res.sendStatus(400);
+    });
+  }
+
+  Post.findByIdAndUpdate(req.params.id, req.body)
+    .then(() => res.sendStatus(200))
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
 });
 
 async function getPosts(filter = {}) {
