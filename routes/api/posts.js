@@ -261,14 +261,22 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 router.put('/:id', async (req, res, next) => {
+  const query = req.body;
+  const postId = req.params.id;
+
+  // incase i later want to use this route to make other edits, make sure the
+  // pined option was sent with the request
   if (req.body.pinned !== undefined) {
-    await Post.updateMany({ author: req.user._id }, { pinned: false }).catch((err) => {
-      console.log(err);
-      return res.sendStatus(400);
-    });
+    // await Post.updateMany({ author: req.user._id }, { pinned: false }).catch((err) => {
+    await Post.findOneAndUpdate({ author: req.user._id, pinned: true }, { pinned: false }).catch(
+      (err) => {
+        console.log(err);
+        return res.sendStatus(400);
+      }
+    );
   }
 
-  Post.findByIdAndUpdate(req.params.id, req.body)
+  Post.findByIdAndUpdate(postId, query)
     .then(() => res.sendStatus(200))
     .catch((err) => {
       console.log(err);
