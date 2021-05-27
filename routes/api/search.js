@@ -10,8 +10,18 @@ router.get('/', async (req, res, next) => {
   // console.log(searchObj);
 
   const posts = await getPosts({ content: { $regex: searchObj.search, $options: 'i' } });
+  const users = await User.find({
+    $or: [
+      { firstName: { $regex: searchObj.search, $options: 'i' } },
+      { lastName: { $regex: searchObj.search, $options: 'i' } },
+      { userName: { $regex: searchObj.search, $options: 'i' } },
+    ],
+  }).catch((err) => {
+    console.log(err);
+    res.sendStatus(400);
+  });
 
-  const results = { posts };
+  const results = { posts, users };
 
   res.send(results);
 });
