@@ -86,6 +86,8 @@ router.post('/', async (req, res, next) => {
     return res.sendStatus(400);
   }
 
+  body('content', '').trim().escape();
+
   const postData = {
     content: req.body.content,
     author: req.user,

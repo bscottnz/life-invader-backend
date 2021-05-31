@@ -114,4 +114,17 @@ router.post('/coverPhoto', upload.single('coverPic'), async (req, res, next) => 
   });
 });
 
+router.put('/description', async (req, res, next) => {
+  body('description', '').trim().escape();
+  const description = req.body.description;
+
+  req.user = await User.findByIdAndUpdate(
+    req.user._id,
+    { description: description },
+    { new: true }
+  );
+
+  res.status(200).send(req.user);
+});
+
 module.exports = router;
