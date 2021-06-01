@@ -136,4 +136,14 @@ router.put('/shop/:numCoins', async (req, res, next) => {
   res.status(200).send(req.user);
 });
 
+// returns follow suggestions for the logged in user
+router.get('/suggestions', async (req, res, next) => {
+  const userId = req.user._id;
+  const alreadyFollowing = [...req.user.following, userId];
+
+  const followSuggestions = await User.find({ _id: { $nin: alreadyFollowing } });
+
+  res.status(200).send(followSuggestions);
+});
+
 module.exports = router;

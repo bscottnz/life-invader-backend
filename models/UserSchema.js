@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema(
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     goldenName: Boolean,
     description: { type: String, trim: true },
-    coins: { type: Number, default: 10 },
+    coins: { type: Number, default: 2 },
   },
   { timestamps: true }
 );
