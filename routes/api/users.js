@@ -127,4 +127,13 @@ router.put('/description', async (req, res, next) => {
   res.status(200).send(req.user);
 });
 
+router.put('/shop/:numCoins', async (req, res, next) => {
+  const userId = req.params.userId;
+  const numCoins = req.params.numCoins;
+
+  req.user = await User.findByIdAndUpdate(req.user.id, { coins: numCoins }, { new: true });
+
+  res.status(200).send(req.user);
+});
+
 module.exports = router;
