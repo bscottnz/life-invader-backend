@@ -40,6 +40,7 @@ const UserSchema = new mongoose.Schema(
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     goldenName: Boolean,
+    admin: Boolean,
     description: { type: String, trim: true },
     coins: { type: Number, default: 2 },
   },
