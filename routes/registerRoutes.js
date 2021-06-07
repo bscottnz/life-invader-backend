@@ -19,6 +19,7 @@ router.post('/', async (req, res) => {
   const username = req.body.username;
   const email = req.body.email;
   const password = req.body.password;
+  const fullName = `${req.body.firstName} ${req.body.lastName}`;
 
   if (firstName && lastName && username && email && password) {
     // find any previous users with the entered username or email
@@ -40,6 +41,7 @@ router.post('/', async (req, res) => {
         username,
         email,
         password,
+        fullName,
       };
 
       data.password = await bcrypt.hash(password, 10);

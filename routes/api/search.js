@@ -7,13 +7,14 @@ const Post = require('../../models/PostSchema');
 
 router.get('/', async (req, res, next) => {
   const searchObj = req.query;
-  // console.log(searchObj);
+  console.log(searchObj);
 
   const posts = await getPosts({ content: { $regex: searchObj.search, $options: 'i' } });
   const users = await User.find({
     $or: [
       { firstName: { $regex: searchObj.search, $options: 'i' } },
       { lastName: { $regex: searchObj.search, $options: 'i' } },
+      { fullName: { $regex: searchObj.search, $options: 'i' } },
       { userName: { $regex: searchObj.search, $options: 'i' } },
     ],
   }).catch((err) => {
