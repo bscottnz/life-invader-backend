@@ -4,6 +4,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
+const Chat = require('../../models/ChatSchema');
 
 router.get('/', async (req, res, next) => {
   res.send('Inbox page');
