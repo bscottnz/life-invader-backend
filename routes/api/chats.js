@@ -110,4 +110,15 @@ function getChatByUserId(currentUserId, otherUserId) {
   ).populate('users');
 }
 
+router.put('/:chatId', (req, res, next) => {
+  Chat.findByIdAndUpdate(req.params.chatId, req.body)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 module.exports = router;
