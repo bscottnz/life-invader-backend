@@ -40,8 +40,10 @@ router.post('/', async (req, res, next) => {
 router.get('/', (req, res, next) => {
   Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
     .populate('users')
+    .populate('lastMessage')
     .sort({ updatedAt: -1 })
-    .then((results) => {
+    .then(async (results) => {
+      results = await User.populate(results, { path: 'lastMessage.sender' });
       res.status(200).send(results);
     })
     .catch((err) => {
