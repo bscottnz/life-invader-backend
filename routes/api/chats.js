@@ -6,6 +6,7 @@ const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 const Chat = require('../../models/ChatSchema');
+const Message = require('../../models/MessageSchema');
 
 router.post('/', async (req, res, next) => {
   if (!req.body.users) {
@@ -86,6 +87,19 @@ router.get('/:chatId', async (req, res, next) => {
   }
 
   res.status(200).send({ chat: chat });
+});
+
+router.get('/:chatId/messages', async (req, res, next) => {
+  const chatId = req.params.chatId;
+  Message.find({ chat: chatId })
+    .populate('sender')
+    .then((results) => {
+      res.status(200).send(results);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
 });
 
 function getChatByUserId(currentUserId, otherUserId) {
