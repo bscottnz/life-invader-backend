@@ -13,6 +13,8 @@ const cors = require('cors');
 
 const middleware = require('./utils/middleware');
 
+app.io = require('socket.io')();
+
 const dotenv = require('dotenv');
 dotenv.config({ path: 'config.env' });
 

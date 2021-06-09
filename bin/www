@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('life-invader-backend:server');
 var http = require('http');
 const dotenv = require('dotenv');
+const { isObject } = require('util');
 dotenv.config({ path: 'config.env' });
 
 /**
@@ -33,6 +34,9 @@ server.on('listening', onListening);
 server.on('listening', () => {
   console.log('Server running on port: ' + port);
 });
+
+// sockets
+app.io.attach(server, { pingTimeout: 60000 });
 
 /**
  * Normalize a port into a number, string, or false.
@@ -89,3 +93,9 @@ function onListening() {
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+// set up socket connection
+
+app.io.on('connection', (socket) => {
+  console.log('socket connected');
+});
