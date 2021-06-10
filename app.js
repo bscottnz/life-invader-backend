@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
@@ -101,6 +101,22 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.send('error');
+});
+
+// set up socket connection
+
+app.io.on('connection', (socket) => {
+  socket.on('setup', (userData) => {
+    socket.join(userData._id);
+  });
+
+  socket.on('join room', (room) => {
+    socket.join(room);
+  });
+
+  socket.on('typing', (room) => {
+    socket.in(room).emit('typing');
+  });
 });
 
 module.exports = app;

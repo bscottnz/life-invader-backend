@@ -24,6 +24,16 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+// sockets
+app.io.attach(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: process.env.CLIENT_URL,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -34,9 +44,6 @@ server.on('listening', onListening);
 server.on('listening', () => {
   console.log('Server running on port: ' + port);
 });
-
-// sockets
-app.io.attach(server, { pingTimeout: 60000 });
 
 /**
  * Normalize a port into a number, string, or false.
@@ -93,9 +100,3 @@ function onListening() {
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-
-// set up socket connection
-
-app.io.on('connection', (socket) => {
-  console.log('socket connected');
-});
