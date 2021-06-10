@@ -108,6 +108,7 @@ app.use(function (err, req, res, next) {
 app.io.on('connection', (socket) => {
   socket.on('setup', (userData) => {
     socket.join(userData._id);
+    socket.emit('connected');
   });
 
   socket.on('join room', (room) => {
@@ -116,6 +117,10 @@ app.io.on('connection', (socket) => {
 
   socket.on('typing', (room) => {
     socket.in(room).emit('typing');
+  });
+
+  socket.on('stop typing', (room) => {
+    socket.in(room).emit('stop typing');
   });
 });
 
