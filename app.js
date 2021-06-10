@@ -122,6 +122,26 @@ app.io.on('connection', (socket) => {
   socket.on('stop typing', (room) => {
     socket.in(room).emit('stop typing');
   });
+
+  socket.on('new message', (newMessage) => {
+    const chat = newMessage.chat;
+
+    console.log('message sent via socket');
+
+    if (!chat.users) {
+      return console.log('no chat users for socket message');
+    }
+
+    chat.users.forEach((user) => {
+      if (user._id === newMessage.sender._id) {
+        // dont send message to ourselves
+        return;
+      }
+      console.log(user._id);
+
+      socket.in(user._id).emit('message recieved', newMessage);
+    });
+  });
 });
 
 module.exports = app;

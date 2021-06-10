@@ -31,6 +31,7 @@ router.post('/', async (req, res, next) => {
     .then(async (results) => {
       results = await results.populate('sender').execPopulate();
       results = await results.populate('chat').execPopulate();
+      results = await results.populate('chat.users').execPopulate();
 
       // update the chat the message is a part of to reflect that this message
       // is the chats latest message
