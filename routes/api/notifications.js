@@ -43,4 +43,19 @@ router.put('/read', (req, res, next) => {
     });
 });
 
+router.delete('/', (req, res, next) => {
+  Notification.deleteMany({
+    userTo: req.user._id,
+  })
+
+    .sort({ createdAt: -1 })
+    .then((results) => {
+      res.sendStatus(200);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 module.exports = router;
