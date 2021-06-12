@@ -4,6 +4,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
+const Notification = require('../../models/NotificationSchema');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -41,6 +42,11 @@ router.put('/:userId/follow', async (req, res, next) => {
       res.sendStatus(400);
     }
   );
+
+  // only send notification if we are following a user. not unfollowing
+  if (!isFollowing) {
+    await Notification.insertNotification(userId, req.user._id, 'follow', req.user._id);
+  }
 
   res.send(req.user);
 });

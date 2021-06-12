@@ -32,6 +32,7 @@ const usersApiRoute = require('./routes/api/users');
 const searchApiRoute = require('./routes/api/search');
 const messagesApiRoute = require('./routes/api/messages');
 const chatsApiRoute = require('./routes/api/chats');
+const notificationsApiRoute = require('./routes/api/notifications');
 
 // middleware -------------------------------------------------------------
 app.use(express.json());
@@ -74,6 +75,7 @@ app.use('/api/users', middleware.requireLogin, usersApiRoute);
 app.use('/api/search', middleware.requireLogin, searchApiRoute);
 app.use('/api/messages', middleware.requireLogin, messagesApiRoute);
 app.use('/api/chats', middleware.requireLogin, chatsApiRoute);
+app.use('/api/notifications', middleware.requireLogin, notificationsApiRoute);
 
 app.get('/logout', (req, res) => {
   console.log(req.user);
