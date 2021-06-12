@@ -4,6 +4,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
+const Notification = require('../../models/NotificationSchema');
 
 router.get('/', async (req, res, next) => {
   const searchObj = req.query;
@@ -118,6 +119,17 @@ router.post('/', async (req, res, next) => {
         newPost = await Post.populate(newPost, { path: 'replyTo' });
         newPost = await User.populate(newPost, { path: 'replyTo.author' });
       }
+
+      // send notification on reply
+      if (newPost.replyTo !== undefined) {
+        await Notification.insertNotification(
+          newPost.replyTo.author._id,
+          req.user._id,
+          'reply',
+          newPost._id
+        );
+      }
+
       res.status(201).send(newPost);
     })
     .catch((err) => {
@@ -171,6 +183,11 @@ router.put('/:id/dislike', async (req, res, next) => {
     console.log(err);
     res.sendStatus(400);
   });
+
+  // only send notif on a like. not a dislike
+  if (!isLiked) {
+    await Notification.insertNotification(post.author, req.user._id, 'like', post._id);
+  }
 
   res.status(200).send(post);
 });
@@ -231,6 +248,11 @@ router.post('/:id/share', async (req, res, next) => {
   repost = await Post.populate(repost, { path: 'sharedPostData' });
   repost = await Post.populate(repost, { path: 'sharedPostData.author' });
   repost = await User.populate(repost, { path: 'author' });
+
+  // only send notif on share, not un-share
+  if (!deletedPost) {
+    await Notification.insertNotification(post.author, req.user._id, 'share', post._id);
+  }
 
   res.status(200).send({ post, repost, option });
 });

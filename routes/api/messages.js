@@ -5,6 +5,7 @@ const { body } = require('express-validator');
 const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 const Chat = require('../../models/ChatSchema');
+const Notification = require('../../models/NotificationSchema');
 const Message = require('../../models/MessageSchema');
 
 router.get('/', async (req, res, next) => {
@@ -36,7 +37,10 @@ router.post('/', async (req, res, next) => {
       // update the chat the message is a part of to reflect that this message
       // is the chats latest message
 
-      await Chat.findByIdAndUpdate(req.body.chatId, { lastMessage: results });
+      const chat = await Chat.findByIdAndUpdate(req.body.chatId, { lastMessage: results });
+
+      // semd notifications to other chat users
+      insertNotifications(chat, results);
 
       res.status(201).send(results);
     })
@@ -45,5 +49,16 @@ router.post('/', async (req, res, next) => {
       res.sendStatus(400);
     });
 });
+
+function insertNotifications(chat, message) {
+  chat.users.forEach(async (userId) => {
+    if (userId == message.sender._id.toString()) {
+      // dont send message notification to ourselves
+      return;
+    }
+
+    await Notification.insertNotification(userId, message.sender._id, 'message', message.chat._id);
+  });
+}
 
 module.exports = router;

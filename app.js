@@ -139,7 +139,6 @@ app.io.on('connection', (socket) => {
         // dont send message to ourselves
         return;
       }
-      console.log(user._id);
 
       socket.in(user._id).emit('message recieved', newMessage);
     });
