@@ -25,4 +25,22 @@ router.get('/', (req, res, next) => {
     });
 });
 
+router.put('/:id/read', (req, res, next) => {
+  Notification.findByIdAndUpdate(req.params.id, { read: true })
+    .then(() => res.sendStatus(204))
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
+router.put('/read', (req, res, next) => {
+  Notification.updateMany({ userTo: req.user._id }, { read: true })
+    .then(() => res.sendStatus(204))
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 module.exports = router;
