@@ -6,9 +6,23 @@ const User = require('../../models/UserSchema');
 const Post = require('../../models/PostSchema');
 const Chat = require('../../models/ChatSchema');
 const Message = require('../../models/MessageSchema');
+const Notification = require('../../models/NotificationSchema');
 
 router.get('/', (req, res, next) => {
-  res.send('hello');
+  Notification.find({
+    userTo: req.user._id,
+    notificationType: { $ne: 'message' },
+  })
+    .populate('userTo')
+    .populate('userFrom')
+    .sort({ createdAt: -1 })
+    .then((results) => {
+      res.status(200).send(results);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
 });
 
 module.exports = router;
