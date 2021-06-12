@@ -87,6 +87,9 @@ router.post('/', async (req, res, next) => {
     return res.sendStatus(400);
   }
 
+  //  i realised this doesnt actually do anything and needs to be declared as middleware
+  // before the async(req, res, next), but i also reaslied react escapes things anyway
+  // and adding this to the middleware will double escape text on the front end.
   body('content', '').trim().escape();
 
   const postData = {
@@ -122,12 +125,15 @@ router.post('/', async (req, res, next) => {
 
       // send notification on reply
       if (newPost.replyTo !== undefined) {
-        await Notification.insertNotification(
-          newPost.replyTo.author._id,
-          req.user._id,
-          'reply',
-          newPost._id
-        );
+        // dont give reply to self notification
+        if (newPost.replyTo.author._id.toString() !== req.user._id.toString()) {
+          await Notification.insertNotification(
+            newPost.replyTo.author._id,
+            req.user._id,
+            'reply',
+            newPost._id
+          );
+        }
       }
 
       res.status(201).send(newPost);
