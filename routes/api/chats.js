@@ -44,6 +44,11 @@ router.get('/', (req, res, next) => {
     .populate('lastMessage')
     .sort({ updatedAt: -1 })
     .then(async (results) => {
+      if (req.query.unreadOnly !== undefined && req.query.unreadOnly == 'true') {
+        // only send unread messages
+        results = results.filter((msg) => !msg.lastMessage.seenBy.includes(req.user._id));
+      }
+
       results = await User.populate(results, { path: 'lastMessage.sender' });
       res.status(200).send(results);
     })

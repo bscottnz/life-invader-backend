@@ -9,10 +9,17 @@ const Message = require('../../models/MessageSchema');
 const Notification = require('../../models/NotificationSchema');
 
 router.get('/', (req, res, next) => {
-  Notification.find({
+  const searchObj = {
     userTo: req.user._id,
     notificationType: { $ne: 'message' },
-  })
+  };
+
+  if (req.query.unreadOnly !== undefined && req.query.unreadOnly == 'true') {
+    // only send unread notifications
+    searchObj.read = false;
+  }
+
+  Notification.find(searchObj)
     .populate('userTo')
     .populate('userFrom')
     .sort({ createdAt: -1 })
