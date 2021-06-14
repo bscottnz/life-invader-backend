@@ -46,7 +46,9 @@ router.get('/', (req, res, next) => {
     .then(async (results) => {
       if (req.query.unreadOnly !== undefined && req.query.unreadOnly == 'true') {
         // only send unread messages
-        results = results.filter((msg) => !msg.lastMessage.seenBy.includes(req.user._id));
+        results = results.filter(
+          (msg) => msg.lastMessage && !msg.lastMessage.seenBy.includes(req.user._id)
+        );
       }
 
       results = await User.populate(results, { path: 'lastMessage.sender' });
@@ -133,6 +135,18 @@ function getChatByUserId(currentUserId, otherUserId) {
 
 router.put('/:chatId', (req, res, next) => {
   Chat.findByIdAndUpdate(req.params.chatId, req.body)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
+router.put('/:chatId/messages/read', async (req, res, next) => {
+  const chatId = req.params.chatId;
+  Message.updateMany({ chat: chatId }, { $addToSet: { seenBy: req.user._id } })
     .then(() => {
       res.sendStatus(204);
     })
