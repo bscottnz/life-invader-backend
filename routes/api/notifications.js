@@ -65,4 +65,20 @@ router.delete('/', (req, res, next) => {
     });
 });
 
+router.get('/latest', (req, res, next) => {
+  const searchObj = {
+    userTo: req.user._id,
+  };
+
+  Notification.findOne(searchObj)
+    .populate('userTo')
+    .populate('userFrom')
+    .sort({ createdAt: -1 })
+    .then((results) => res.status(200).send(results))
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(400);
+    });
+});
+
 module.exports = router;
