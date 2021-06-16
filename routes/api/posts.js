@@ -190,8 +190,8 @@ router.put('/:id/dislike', async (req, res, next) => {
     res.sendStatus(400);
   });
 
-  // only send notif on a like. not a dislike
-  if (!isLiked) {
+  // only send notif on a like. not a dislike. do not send notification for disliking own post
+  if (!isLiked && post.author.toString() !== req.user._id.toString()) {
     await Notification.insertNotification(post.author, req.user._id, 'like', post._id);
   }
 
@@ -255,8 +255,8 @@ router.post('/:id/share', async (req, res, next) => {
   repost = await Post.populate(repost, { path: 'sharedPostData.author' });
   repost = await User.populate(repost, { path: 'author' });
 
-  // only send notif on share, not un-share
-  if (!deletedPost) {
+  // only send notif on share, not un-share. no notification for share own post
+  if (!deletedPost && post.author.toString() !== req.user._id.toString()) {
     await Notification.insertNotification(post.author, req.user._id, 'share', post._id);
   }
 
