@@ -2,6 +2,9 @@
   "name": "life-invader-backend",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "15.0.1"
+  },
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "nodemon ./bin/www"
