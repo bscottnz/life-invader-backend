@@ -50,6 +50,10 @@ app.use(
     secret: 'beniscool',
     resave: true,
     saveUninitialized: true,
+    cookie: {
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // must be 'none' to enable cross-site delivery
+      secure: process.env.NODE_ENV === 'production', // must be true if sameSite='none'
+    },
   })
 );
 
@@ -72,6 +76,8 @@ app.use(function (req, res, next) {
   );
   next();
 });
+
+app.set('trust proxy', 1);
 
 // routes -----------------------------------------------------------------
 
