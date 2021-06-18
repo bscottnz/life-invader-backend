@@ -29,7 +29,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profilePic: { type: Object },
+    profilePic: {
+      type: Object,
+      default: {
+        url: 'https://lifeinvadersocial.s3.ap-southeast-2.amazonaws.com/d8gq068vlkq1tqv46.png',
+      },
+    },
     coverPhoto: { type: Object },
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
     shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
