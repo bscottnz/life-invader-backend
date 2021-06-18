@@ -8,8 +8,28 @@ const Notification = require('../../models/NotificationSchema');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const AWS = require('aws-sdk');
 
-const upload = multer({ dest: 'uploads/' });
+const uniqid = require('uniqid');
+
+const dotenv = require('dotenv');
+dotenv.config({ path: 'config.env' });
+
+// const upload = multer({ dest: 'uploads/' });
+
+const S3 = new AWS.S3();
+
+const storage = multer.memoryStorage({
+  destination: (req, file, callback) => {
+    callback(null, '');
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: 5 * 1024 * 1024,
+  dest: 'uploads/',
+}).single('image');
 
 router.put('/:userId/follow', async (req, res, next) => {
   const userId = req.params.userId;
@@ -64,59 +84,96 @@ router.get('/:username/followers', (req, res, next) => {
     });
 });
 
-router.post('/profilePicture', upload.single('profilePic'), async (req, res, next) => {
+router.post('/profilePicture', upload, async (req, res, next) => {
   if (!req.file) {
     console.log('no profile image uploaded');
     return res.sendStatus(400);
   }
 
-  // const filePath = `/uploads/images/${req.file.filename}.png`;
-  const filePath = `/public/images/userImages/${req.file.filename}.png`;
-  const clientPath = `/images/userImages/${req.file.filename}.png`;
-  const tempPath = req.file.path;
-  const targetPath = path.join(__dirname, `../../${filePath}`);
+  const imageId = uniqid();
 
-  fs.rename(tempPath, targetPath, async (error) => {
-    if (error !== null) {
-      console.log(error);
-      return res.sendStatus(400);
+  const params = {
+    Bucket: process.env.AWS_BUCKET,
+    Key: `${imageId}.png`,
+    Body: req.file.buffer,
+    ACL: 'public-read',
+  };
+  S3.upload(params, async (err, data) => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(400);
+    } else {
+      console.log('upload');
+      req.user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          profilePic: {
+            url: data.Location,
+            id: imageId,
+          },
+        },
+        { new: true }
+      );
+
+      res.status(200).send(req.user);
     }
-
-    req.user = await User.findByIdAndUpdate(
-      req.user._id,
-      { profilePic: clientPath },
-      { new: true }
-    );
-
-    res.status(200).send(req.user);
   });
+
+  // // const filePath = `/uploads/images/${req.file.filename}.png`;
+  // const filePath = `/public/images/userImages/${req.file.filename}.png`;
+  // const clientPath = `/images/userImages/${req.file.filename}.png`;
+  // const tempPath = req.file.path;
+  // const targetPath = path.join(__dirname, `../../${filePath}`);
+
+  // fs.rename(tempPath, targetPath, async (error) => {
+  //   if (error !== null) {
+  //     console.log(error);
+  //     return res.sendStatus(400);
+  //   }
+
+  //   req.user = await User.findByIdAndUpdate(
+  //     req.user._id,
+  //     { profilePic: clientPath },
+  //     { new: true }
+  //   );
+
+  //   res.status(200).send(req.user);
+  // });
 });
 
-router.post('/coverPhoto', upload.single('coverPic'), async (req, res, next) => {
+router.post('/coverPhoto', upload, async (req, res, next) => {
   if (!req.file) {
     console.log('no profile image uploaded');
     return res.sendStatus(400);
   }
 
-  // const filePath = `/uploads/images/${req.file.filename}.png`;
-  const filePath = `/public/images/userImages/${req.file.filename}.png`;
-  const clientPath = `/images/userImages/${req.file.filename}.png`;
-  const tempPath = req.file.path;
-  const targetPath = path.join(__dirname, `../../${filePath}`);
+  const imageId = uniqid();
 
-  fs.rename(tempPath, targetPath, async (error) => {
-    if (error !== null) {
-      console.log(error);
-      return res.sendStatus(400);
+  const params = {
+    Bucket: process.env.AWS_BUCKET,
+    Key: `${imageId}.png`,
+    Body: req.file.buffer,
+    ACL: 'public-read',
+  };
+  S3.upload(params, async (err, data) => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(400);
+    } else {
+      console.log('upload');
+      req.user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          coverPhoto: {
+            url: data.Location,
+            id: imageId,
+          },
+        },
+        { new: true }
+      );
+
+      res.status(200).send(req.user);
     }
-
-    req.user = await User.findByIdAndUpdate(
-      req.user._id,
-      { coverPhoto: clientPath },
-      { new: true }
-    );
-
-    res.status(200).send(req.user);
   });
 });
 
