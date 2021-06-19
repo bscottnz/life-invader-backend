@@ -23,7 +23,11 @@ router.post('/', (req, res, next) => {
 
         // update database to reflect a new user login. just for my own interest to see how many
         // people try out the site
-        await Login.create({ userName: req.user.username });
+        let day = new Date().toDateString();
+        day = day.slice(0, day.length - 5);
+        const time = new Date().toLocaleTimeString();
+        const date = `${day}: ${time}`;
+        await Login.create({ userName: req.user.username, date: date });
 
         res.send(req.user);
       });
