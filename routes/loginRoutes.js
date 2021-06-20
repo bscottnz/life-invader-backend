@@ -25,9 +25,9 @@ router.post('/', (req, res, next) => {
         // people try out the site
         let day = new Date().toDateString();
         day = day.slice(0, day.length - 5);
-        const time = new Date().toLocaleTimeString();
+        const time = new Date().toLocaleTimeString('en-NZ');
         const date = `${day}: ${time}`;
-        await Login.create({ userName: req.user.username, date: date });
+        await Login.create({ username: req.user.username, date: date });
 
         res.send(req.user);
       });
